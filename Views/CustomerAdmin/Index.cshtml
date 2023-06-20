@@ -12,60 +12,170 @@
     <title></title>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 
 
  
   <body>
 
-    <div class="card mb-4 mt-2">
-        <div class="card-header">
-            <i class="fas fa-table mr-1"></i>
-            Kategoriler
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="categoriesTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                        
-                    
+
+      <div class="container">
+      
+        <div class="card mb-4 mt-2">
+            <div class="row">
 
 
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Id</th>
-                         
-
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        @foreach(var customer in Model)
-                        {
+                <div class="col-md-6">
+                    <h1>Manage <b> Customers</b></h1>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button id="AddCustomerBtn" type="button" data-toggle="modal" data-target="#addCustomerModal" class="btn btn-success">
+                        <i class="bi bi-person-add"></i><span> Add Customer</span></button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="categoriesTable" width="100%" cellspacing="0">
+                        <thead>
                             <tr>
-                                <td>@customer.Id</td>
-                            </tr>
-                           
-                        }
+                                <th>Id</th>
+                                <th>Name</th>
+                                <th>Surname</th>
+                                <th>Actions</th>
 
-                    </tbody>
-                </table>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var customer in Model)
+                            {
+                                <tr id="trCustomer_@customer.Id">
+                                    <td>@customer.Id</td>
+                                    <td>@customer.Name</td>
+                                    <td>@customer.Surname</td>
+                                    <td>
+                                     <button onclick="openModal(@customer.Id)" type="button" 
+                                     data-toggle="modal" data-target="#editCustomerModal" class="btn btn-warning">
+                                            <i class="bi bi-pencil"></i><span> Edit Customer</span>
+                                        </button>
+
+                                     <button onclick="deleteCustomer(@customer.Id)" type="button"  class="btn btn-danger">
+                                            <i class="bi bi-trash-fill"></i><span> Delete Customer</span>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+      </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="addCustomerModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form>
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Customer</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="name" name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Surname</label>
+                            <input type="text" id="surname" name="surname" class="form-control" required>
+                        </div>
+                        <div class="modal-footer">
+                            <input id="Save" type="submit" class="btn btn-success" value="Add">
+                        </div>
+                        </div>
+                </form>
             </div>
         </div>
     </div>
 
+    <div class="modal" tabindex="-1" role="dialog" id="editCustomerModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+             
+                    <div class="modal-header">
+                        <h4 class="modal-title">Edit Customer</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" id="editName"  name="name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Surname</label>
+                            <input type="text" id="editSurname" name="surname" class="form-control" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button onclick="editCustomer()" class="btn btn-success" value="Edit">Update</button>
+                        </div>
+                    </div>
+               
+            </div>
+        </div>
+    </div>
+
+
+   
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function (){
-            $('#categoriesTable').Datatable();
+            $('#categoriesTable').dataTable();
         })
+        var willDeleteId;
+
+        function openModal(id){
+                willDeleteId = id;
+        }
+
+        function editCustomer(){
+            var person = {};
+            person.Id=willDeleteId;
+            person.name = $('#editName').val();
+            person.surname = $('#editSurname').val();
+            $.ajax({
+                url: 'http://localhost:5293/api/Customers/' + willDeleteId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(person),
+                success: function (data, textStatus, xhr) {
+                    console.log(data);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Error in Operation', xhr, textStatus, errorThrown);
+                }
+            });
+        }
+
+        function deleteCustomer(id){
+            $.ajax({
+                url: 'http://localhost:5293/api/Customers/' + id,
+
+                type: 'DELETE',
+                success: function (data, textStatus, xhr) {
+                    $(`#trCustomer_${id}`).remove();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log('Error in Operation');
+                }
+            });
+           
+        }
     </script>
 </body>
 </html>
