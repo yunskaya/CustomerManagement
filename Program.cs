@@ -27,20 +27,16 @@ builder.Services.ConfigureServiceManager();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-    
-}
+
 app.UseRouting();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute(
-        name: "default",
-        pattern: "{controller=Home}/{action=Index}/{id?}");
-});
+
+
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 
 app.UseCors();

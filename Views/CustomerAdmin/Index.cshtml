@@ -13,6 +13,11 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        #actionColumn {
+            width : 40%;
+        }
+    </style>
 </head>
 
 
@@ -29,8 +34,8 @@
                 <div class="col-md-6">
                     <h1>Manage <b> Customers</b></h1>
                 </div>
-                <div class="col-md-6 text-end">
-                    <button id="AddCustomerBtn" type="button" data-toggle="modal" data-target="#addCustomerModal" class="btn btn-success">
+                <div class="col-md-6  text-right" style="padding-top: 20px;">
+                    <button type="button" data-toggle="modal" data-target="#addCustomerModal" class="btn btn-success">
                         <i class="bi bi-person-add"></i><span> Add Customer</span></button>
                 </div>
             </div>
@@ -42,24 +47,24 @@
                                 <th>Id</th>
                                 <th>Name</th>
                                 <th>Surname</th>
-                                <th>Actions</th>
+                                <th id="actionColumn">Actions</th>
 
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var customer in Model)
                             {
-                                <tr id="trCustomer_@customer.Id">
-                                    <td>@customer.Id</td>
+                                <tr id="trCustomer_@customer.CustomerId">
+                                    <td>@customer.CustomerId</td>
                                     <td>@customer.Name</td>
                                     <td>@customer.Surname</td>
                                     <td>
-                                     <button onclick="openModal(@customer.Id)" type="button" 
-                                     data-toggle="modal" data-target="#editCustomerModal" class="btn btn-warning">
+                                        <button onclick="openModal(@customer.CustomerId)" type="button"
+                                                data-toggle="modal" data-target="#editCustomerModal" class="btn btn-warning">
                                             <i class="bi bi-pencil"></i><span> Edit Customer</span>
                                         </button>
 
-                                     <button onclick="deleteCustomer(@customer.Id)" type="button"  class="btn btn-danger">
+                                        <button onclick="deleteCustomer(@customer.CustomerId)" type="button" class="btn btn-danger">
                                             <i class="bi bi-trash-fill"></i><span> Delete Customer</span>
                                         </button>
                                     </td>
@@ -92,10 +97,18 @@
                             <label>Surname</label>
                             <input type="text" id="surname" name="surname" class="form-control" required>
                         </div>
+                      @*  <div class="form-group">
+                            <label>City</label>
+                            <input type="text" id="city" name="city" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>District</label>
+                            <input type="text" id="district" name="district" class="form-control" required>
+                        </div>*@
                         <div class="modal-footer">
-                            <input id="Save" type="submit" class="btn btn-success" value="Add">
+                            <button onclick="addCustomer()" type="submit" class="btn btn-success" value="Add">Add</button>
                         </div>
-                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -134,27 +147,70 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
 
     <script type="text/javascript">
+
         $(document).ready(function (){
             $('#categoriesTable').dataTable();
         })
-        var willDeleteId;
 
+        var willDeleteId;
+        var url = "http://localhost:5293/api/Customers";
+       
         function openModal(id){
                 willDeleteId = id;
+              //  $('#editName').attr("placeholder",name);
+              //  $('#editSurname').attr("placeholder", surname);
+        }
+    
+        function addCustomer(){
+            var person = {};
+            person.name = $('#name').val();
+            person.surname = $('#surname').val();
+            person.customerAddress
+
+
+            var address = {};
+            address.city =$('#city').val();
+            address.district = $('#district').val();
+
+            var customer = {};
+                customer.name = person.name,
+                customer.surname = person.surname,
+                customer.customerAddress = address
+           
+
+            console.log(customer)
+            alert(1)
+            $.ajax({
+                type: 'POST',
+                url: url,
+                    : customer,
+                contentType: 'application/json',
+                success: function (data, textStatus, xhr) {
+
+                   location.reload();
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(xhr, textStatus, errorThrown)
+                    alert('Error in Operation', xhr, textStatus, errorThrown);
+                }
+            });
+
         }
 
         function editCustomer(){
+
             var person = {};
             person.Id=willDeleteId;
             person.name = $('#editName').val();
             person.surname = $('#editSurname').val();
+
             $.ajax({
-                url: 'http://localhost:5293/api/Customers/' + willDeleteId,
+                url: url+'/' + willDeleteId,
                 type: 'PUT',
                 contentType: 'application/json',
                 data: JSON.stringify(person),
                 success: function (data, textStatus, xhr) {
-                    console.log(data);
+                    location.reload();
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     console.log('Error in Operation', xhr, textStatus, errorThrown);
@@ -164,7 +220,7 @@
 
         function deleteCustomer(id){
             $.ajax({
-                url: 'http://localhost:5293/api/Customers/' + id,
+                url: url+'/' + id,
 
                 type: 'DELETE',
                 success: function (data, textStatus, xhr) {

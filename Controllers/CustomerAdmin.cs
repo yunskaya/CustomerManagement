@@ -20,5 +20,11 @@ namespace CustomerManagement.Controllers
 
             return View(Customers);
         }
+        [Route("/admin")]
+        [HttpGet]
+        public IActionResult adminIndex()
+        {
+            return View();
+        }
     }
 }

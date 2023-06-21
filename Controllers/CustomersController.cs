@@ -4,14 +4,18 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Repositories.Contracts;
 using Services.Contract;
+using Entities.Objects;
+using System.ComponentModel.DataAnnotations;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace CustomerManagement.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/deneme")]
     [ApiController]
     public class CustomersController : ControllerBase
     {
         private readonly IServicesManager _manager;
+
 
         public CustomersController(IServicesManager manager)
         {
@@ -52,9 +56,9 @@ namespace CustomerManagement.Controllers
             }
 
         }
-
+        [SwaggerOperation(Tags = new[] { "Management: Chest" })]
         [HttpPost]
-        public IActionResult CreateOneCustomer([FromBody] Customer customer)
+        public IActionResult CreateOneCustomer([FromBody] CreateCustomer customer)
         {
             try
             {
@@ -62,8 +66,8 @@ namespace CustomerManagement.Controllers
                     return BadRequest(); // 400 
 
                 _manager.customerServices.CreateOneCustomer(customer);
-                
-
+                //var address=_manager.addressServices.CreateOneAddress(customer.Addresses.FirstOrDefault());
+                //_manager.customerServices.AddAddressToCustomer(customer.CustomerId, address);
                 return StatusCode(201, customer);
             }
             catch (Exception ex)
@@ -82,7 +86,7 @@ namespace CustomerManagement.Controllers
                     return BadRequest();
 
                 // check id
-                if (id != customer.Id)
+                if (id != customer.CustomerId)
                     return BadRequest(); // 400
 
                 _manager.customerServices.UpdateOneCustomer(id,customer,true);
